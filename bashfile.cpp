@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <sys/wait.h>
 #define clear_scr() printf("\033[H\033[J")
+#define HOME "/home/meenu"
 using namespace std;
 static char** history;
 static char* custom[]={"cd","exit","help"};
@@ -89,15 +90,37 @@ int check_custom(char **processed_ip)
      }
   return 0;
 }
-/*void executeCustom(char **processed_ip)
+int executeCustom(char **processed_ip)
 {
+  if(strcmp(processed_ip[0],"cd")==0)
+  {
+     if(strcmp(processed_ip[1],"~")==0)
+     {
+        chdir(HOME);
+     }
+     else
+     {
+     int ret=chdir(processed_ip[1]);
+     if(ret<0)
+     {
+       cout<<"Failed to change directory\n";
+     }
+     }
+     return 0;
 
-}*/
-void executeCommand(char **processed_ip)
+  }
+  if(strcmp(processed_ip[0],"exit")==0)
+  {
+     return -1;
+
+  }
+}
+int executeCommand(char **processed_ip)
 {
   if(check_custom(processed_ip)==1)
   {
-    executeCustom(char **processed_ip);
+    int val=executeCustom(processed_ip);
+    return val;
   }
 
   pid_t pid_child=fork();
@@ -105,24 +128,24 @@ void executeCommand(char **processed_ip)
   if(pid_child==-1)
   {
      cout<<"Failed forking the child process";
-     return;
+     return 0;
   }
   else if(pid_child==0)
   {
    int t=execvp(processed_ip[0],processed_ip);
    if(t<0)
         cout<<"Command not found!\n";
-    return;
+    return 0;
   }
   else
   {   wait(NULL);
-      return;
+      return 0;
    }
 }
-void handleSignal(int signal_no)
+void handleSignal(int signal_no) //why not working???
 {
   signal(SIGINT,handleSignal);
-  fflush(stdout);
+  //fflush(stdout);
 
 }
 int main()
@@ -134,7 +157,10 @@ while(1)
    printPrompt();
    char *in=getInput();
    char **processed_ip=ProcessString(in);
-   executeCommand(processed_ip);
-}
+   int ret_val=executeCommand(processed_ip);
+   if(ret_val==-1)
+     break;
+ }
+
 return 0;
 }

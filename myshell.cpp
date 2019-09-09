@@ -207,6 +207,9 @@ while(1)
          
    else if(overwrite>0&&pipecount==0)
         processed_ip=ProcessString_withOverwrite(in);
+   else if(overwrite>0&&pipecount>0)
+    	processed_ip=ProcessString_withOverwrite(in);
+    
          
    int ret_val=executeCommand(processed_ip, pipecount, append, overwrite, environment_var,history,custom);
    if(ret_val==-1)
